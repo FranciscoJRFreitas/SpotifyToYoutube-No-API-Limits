@@ -11,6 +11,11 @@ const GREEN = "\x1b[32m"; // Green color
 const YELLOW = "\x1b[33m"; // Yellow color
 const RESET = "\x1b[0m";
 
+// Delay function to pause execution for a specified duration
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Load the configuration from the JSON file
 function loadConfig() {
   if (!fs.existsSync(CONFIG_FILE)) {
@@ -149,6 +154,13 @@ async function addToYouTubePlaylist(playlistId, videoId, track) {
       }
     );
 
+    if (response.status === 429) {
+      console.error(
+        `${RED}Rate limit exceeded (429). Please wait and try again later or update the Youtube 'Cookie' value.${RESET}`
+      );
+      process.exit(1);
+    }
+
     const data = await response.json();
     if (data.status === "STATUS_SUCCEEDED") {
       console.log(`Successfully added: ${track} (Video ID: ${videoId})`);
@@ -191,6 +203,8 @@ async function retryFailedSongs(
 
   for (const track of failedSongs) {
     try {
+      await delay(1000); // 1-second delay
+
       const results = await yt.search(track);
       if (results.length > 0) {
         const videoId = results[0].id.videoId;
@@ -281,6 +295,8 @@ function getOrCreatePlaylistFolder(playlistName) {
   let processedCount = 0;
 
   for (const track of toProcess) {
+    await delay(1000); // 1-second delay
+
     try {
       if (addedSongs.has(track)) {
         processedCount++;
