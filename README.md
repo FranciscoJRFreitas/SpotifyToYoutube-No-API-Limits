@@ -24,12 +24,12 @@ This script transfers tracks from any Spotify playlist to a YouTube playlist aut
 ### Step 1: Clone the Repository
 Clone this repository to your local machine:
 ```bash
-git clone https://github.com/FranciscoJRFreitas/Spotify2Youtube-No-API-Limits.git
+git clone https://github.com/FranciscoJRFreitas/SpotifyToYoutube-No-API-Limits.git
 ```
 
 Navigate to the project directory:
 ```
-cd Spotify2Youtube-No-API-Limits
+cd SpotifyToYoutube-No-API-Limits
 ```
 ### Step 2: Install Dependencies
 Run the following command to install the required packages:
