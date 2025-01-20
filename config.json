@@ -1,0 +1,19 @@
+{
+  "spotify": {
+    "clientId": "your_client_id",
+    "clientSecret": "your_client_secret",
+    "redirectUri": "http://localhost:8080/callback",
+    "playlistURL": "https://open.spotify.com/playlist{playlistId}?si={si}"
+  },
+  "youtube": {
+    "playlistURL": "https://www.youtube.com/playlist?list={playlist}",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "SAPISIDHASH ... ",
+      "Cookie": "__Secure-3PSID= ... wide=1",
+      "X-Goog-Visitor-Id": "...",
+      "X-Origin": "https://www.youtube.com",
+      "X-Youtube-Client-Version": "2.20250116.10.00"
+    }
+  }
+}

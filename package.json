@@ -1,0 +1,10 @@
+{
+    "name": "spotify2yt",
+    "version": "1.0.0",
+    "type": "module",
+    "dependencies": {
+        "node-fetch": "^3.3.2",
+        "spotify-web-api-node": "^5.0.2",
+        "youtube-search-without-api-key": "^2.0.1"
+    }
+}
