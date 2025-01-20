@@ -68,7 +68,7 @@ npm install
 }
 ```
 
-For the headers segment in this configuration, open [Youtube](https://www.youtube.com) and login to your desired account with the target playlist. After that, open Developer Tools of your browser (*Press F12 key to toggle*) switch to *"Network"* tab and perform any action in Youtube (ex.: go to library, search or open any video, etc.). In the developer tools, filter by *"www.youtube"* and inspect any request made. Scroll down to *"Request Headers"* and there you have all the header parameters you need to copy from your session: ***Authorization***, ***Cookie***, ***X-Goog-Visitor-Id*** and eventually ***X-Youtube-Client-Version***.
+For the headers segment in this configuration, open [Youtube](https://www.youtube.com) and login to your desired account with the target playlist. After that, open Developer Tools of your browser (*Press F12 key to toggle*) switch to *"Network"* tab and perform a search action in Youtube (i.e. search for any video). In the developer tools, filter by *"v1/search"* and inspect any request made. Scroll down to *"Request Headers"* and there you have all the header parameters you need to copy from your session: ***Authorization***, ***Cookie***, ***X-Goog-Visitor-Id*** and eventually ***X-Youtube-Client-Version***.
 
 *Tip: You can easily copy any value by pressing right click on the header and "Copy Value".*
 
