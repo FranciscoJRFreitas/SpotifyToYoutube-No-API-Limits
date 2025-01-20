@@ -9,6 +9,7 @@ let config = {};
 const RED = "\x1b[31m"; // Red color
 const GREEN = "\x1b[32m"; // Green color
 const YELLOW = "\x1b[33m"; // Yellow color
+const BLUE = "\x1b[34m"; // Blue color
 const RESET = "\x1b[0m";
 
 // Delay function to pause execution for a specified duration
@@ -78,7 +79,9 @@ function updateProgress(current, total) {
   const bar = "=".repeat(filledLength) + "-".repeat(barLength - filledLength);
 
   readline.cursorTo(process.stdout, 0);
-  process.stdout.write(`[${bar}] ${current}/${total} (${progress}%)`);
+  process.stdout.write(
+    `${BLUE}[${bar}] ${current}/${total} (${progress}%) ${RESET}`
+  );
   if (current === total) {
     console.log(GREEN, "\nTransfer complete!");
   }
@@ -204,7 +207,7 @@ async function retryFailedSongs(
 
   for (const track of failedSongs) {
     try {
-      await delay(1000); // 1-second delay
+      await delay(500); // 1-second delay
 
       const results = await yt.search(track);
       if (results.length > 0) {
@@ -297,7 +300,7 @@ function getOrCreatePlaylistFolder(playlistName) {
   let processedCount = 0;
 
   for (const track of toProcess) {
-    await delay(1000); // 1-second delay to prevent rate limits
+    await delay(500); // 1-second delay to prevent rate limits
 
     try {
       if (addedSongs.has(track)) {
