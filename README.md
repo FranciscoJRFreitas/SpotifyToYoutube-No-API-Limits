@@ -8,7 +8,7 @@ This script transfers tracks from any Spotify playlist to a YouTube playlist aut
 - Transfers songs from any Spotify playlist to a YouTube playlist.
 - Automatically retries failed tracks.
 - Stores progress logs (`added_songs` and `failed_songs`) in a dedicated folder for each playlist.
-- Handles different URL formats for Spotify and YouTube playlists.
+- Allows you to pause or abort the program and resume from where you left off.
 - Prompts to refresh cookies if authentication fails.
 
 ---
