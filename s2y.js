@@ -156,9 +156,9 @@ async function addToYouTubePlaylist(playlistId, videoId, track) {
 
     if (response.status === 429) {
       console.error(
-        `${RED}Rate limit exceeded (429). Please wait and try again later or update the Youtube 'Cookie' value.${RESET}`
+        `${RED}Rate limit exceeded (429). Please wait and try again later, or update the YouTube 'Cookie' value in the config file.${RESET}`
       );
-      process.exit(1);
+      process.exit(1); // Stop execution on rate limit
     }
 
     const data = await response.json();
@@ -167,18 +167,19 @@ async function addToYouTubePlaylist(playlistId, videoId, track) {
       return true;
     } else {
       console.error(
-        `${RED}Failed to add ${RESET} ${track}: ${JSON.stringify(data)}`
+        `${RED}Failed to add ${track}:${RESET} ${JSON.stringify(data)}`
       );
       const errorMessage = JSON.stringify(data);
       if (
         errorMessage.includes("visitorData") ||
         errorMessage.includes("UNAUTHENTICATED") ||
-        errorMessage.includes("CREDENTIALS_MISSING")
+        errorMessage.includes("CREDENTIALS_MISSING") ||
+        errorMessage.includes("responseContext")
       ) {
         console.error(
           `${RED}The YouTube 'Cookie' value in the config file is invalid or missing. Please update the 'Cookie' in config.json and restart the script.${RESET}`
         );
-        process.exit(1);
+        process.exit(1); // Stop execution for critical errors
       }
       return false;
     }
@@ -240,6 +241,7 @@ async function retryFailedSongs(
       `failed_songs_${config.spotify.playlistURL}.txt`,
       newFailedSongs
     );
+    process.exit(1); // Exit after retry failures
   } else {
     console.log(
       `${GREEN}All failed songs have been successfully processed.${RESET}`
@@ -295,7 +297,7 @@ function getOrCreatePlaylistFolder(playlistName) {
   let processedCount = 0;
 
   for (const track of toProcess) {
-    await delay(1000); // 1-second delay
+    await delay(1000); // 1-second delay to prevent rate limits
 
     try {
       if (addedSongs.has(track)) {
@@ -332,6 +334,14 @@ function getOrCreatePlaylistFolder(playlistName) {
 
     processedCount++;
     updateProgress(processedCount, toProcess.length);
+
+    // Stop if the currentFailedSongs exceeds a threshold
+    if (currentFailedSongs.size > 30) {
+      console.error(
+        `${RED}Too many failures encountered. Please check your configuration and retry.${RESET}`
+      );
+      process.exit(1);
+    }
   }
 
   saveSongsToFile(failedSongsFile, currentFailedSongs);
