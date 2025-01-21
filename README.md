@@ -40,9 +40,7 @@ npm install
 
 ### Step 0: Create an Empty (or use existing) Youtube Playlist
 
-- [PC Guide](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DDesktop)
-- [Mobile - Android Guide](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DAndroid)
-- [Mobile - iPhone and iPad Guide](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DiOS&oco=0)
+[Guide on how to create a playlist on Web](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DDesktop) (Pretty straight forward)
 
 ### Step 1: Obtain Spotify API Credentials
 
