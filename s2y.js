@@ -10,6 +10,7 @@ const RED = "\x1b[31m"; // Red color
 const GREEN = "\x1b[32m"; // Green color
 const YELLOW = "\x1b[33m"; // Yellow color
 const BLUE = "\x1b[34m"; // Blue color
+const CYAN = "\x1b[36m"; // Cyan color
 const RESET = "\x1b[0m";
 
 // Delay function to pause execution for a specified duration
@@ -182,7 +183,30 @@ async function addToYouTubePlaylist(playlistId, videoId, track) {
         console.error(
           `${RED}The YouTube 'Cookie' value in the config file is invalid or missing. Please update the 'Cookie' in config.json and restart the script.${RESET}`
         );
-        process.exit(1); // Stop execution for critical errors
+
+        // Prompt user for a new Cookie
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
+
+        const newCookie = await new Promise((resolve) => {
+          rl.question(`${CYAN}Please enter the new YouTube Cookie: ${RESET}`, (cookie) => {
+            resolve(cookie.trim());
+            rl.close();
+          });
+        });
+
+        if (newCookie) {
+          config.youtube.headers.Cookie = newCookie;
+
+          // Update the config file with the new Cookie
+          fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
+          console.log(`${GREEN}Updated the Cookie in config.json. Retrying...${RESET}`);
+        } else {
+          console.error(`${RED}No Cookie provided. Exiting the program.${RESET}`);
+          process.exit(1);
+        }
       }
       return false;
     }
@@ -209,7 +233,53 @@ async function retryFailedSongs(
     try {
       await delay(500); // 1-second delay
 
-      const results = await yt.search(track);
+      let results;
+      try {
+        results = await yt.search(track);
+      } catch (err) {
+        if (err.code === "ERR_TOO_MANY_REDIRECTS") {
+          console.error(
+            `${RED}Error processing track "${track}": MaxRedirectsError encountered.${RESET}`
+          );
+
+          // Prompt user for a new Cookie
+          const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+          });
+
+          const newCookie = await new Promise((resolve) => {
+            rl.question(
+              `${YELLOW}MaxRedirectsError encountered. Please refresh the YouTube 'Cookie' in the config file or ${CYAN}paste the new Cookie here:${RESET} `,
+              (cookie) => {
+                resolve(cookie.trim());
+                rl.close();
+              }
+            );
+          });
+
+          if (newCookie) {
+            config.youtube.headers.Cookie = newCookie;
+
+            // Update the config file with the new Cookie
+            fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), "utf-8");
+            console.log(
+              `${GREEN}Updated the Cookie in config.json. Retrying track: "${track}".${RESET}`
+            );
+
+            // Retry the track after updating the Cookie
+            results = await yt.search(track);
+          } else {
+            console.error(
+              `${RED}No Cookie provided. Exiting the program.${RESET}`
+            );
+            process.exit(1);
+          }
+        } else {
+          throw err; // Re-throw if it's a different error
+        }
+      }
+
       if (results.length > 0) {
         const videoId = results[0].id.videoId;
         const success = await addToYouTubePlaylist(
@@ -238,7 +308,7 @@ async function retryFailedSongs(
 
   if (newFailedSongs.size > 0) {
     console.error(
-      `${RED}Some songs could not be added. Please refresh the 'Cookie' in the config file and run the script again.${RESET}`
+      `${RED}Some songs could not be added. Please check the logs and retry.${RESET}`
     );
     saveSongsToFile(
       `failed_songs_${config.spotify.playlistURL}.txt`,
