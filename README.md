@@ -44,7 +44,15 @@ npm install
 - [Mobile - Android](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DAndroid)
 - [Mobile - iPhone and iPad](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DiOS&oco=0)
 
-### Step 1: Edit the ***config.json*** File
+### Step 1: Obtain Spotify API Credentials
+
+1. Log in to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+
+2. Create an application and retrieve the Client ID and Client Secret.
+
+3. Add http://localhost:8080/callback to the list of Redirect URIs in your app settings.
+
+### Step 2: Edit the ***config.json*** File
 
 ```json
 {
@@ -76,14 +84,6 @@ Use this process to update the ***Cookie*** header, when required/prompted.
 
 *Tip: You can easily copy any value by pressing right click on the header and "Copy Value".*
 
-### Step 3 - Obtain Spotify API Credentials
-
-1. Log in to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-
-2. Create an application and retrieve the Client ID and Client Secret.
-
-3. Add http://localhost:8080/callback to the list of Redirect URIs in your app settings.
-
 ## Usage
 
 ### Step 1: Run the Script
@@ -94,7 +94,7 @@ node s2y.js
 ```
 
 ## File Structure
-Each playlist will have its own folder in the *playlists/* directory:
+If you decided to use this script to migrate more than one playlist, each one will have its own folder in the *playlists/* directory:
 
 ```
 playlists/
