@@ -48,8 +48,6 @@ npm install
 
 2. Create an application and retrieve the Client ID and Client Secret.
 
-3. Add http://localhost:8080/callback to the list of Redirect URIs in your app settings.
-
 ### Step 2: Edit the ***config.json*** File
 
 ```json
