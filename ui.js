@@ -17,8 +17,8 @@ const UI_DIR = path.join(ROOT, "ui");
 const PLAYLISTS_DIR = path.join(ROOT, "playlists");
 const CONFIG_FILE = path.join(ROOT, "config.json");
 
-const REDIRECT_ERROR_THRESHOLD = 5;
-const REDIRECT_COOLDOWN_MS = 5 * 60 * 1000;
+const REDIRECT_ERROR_THRESHOLD = 2;
+const REDIRECT_COOLDOWN_MS = 2 * 60 * 1000;
 
 const state = {
   running: false,
