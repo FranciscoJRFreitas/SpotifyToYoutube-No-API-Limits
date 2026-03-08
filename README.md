@@ -61,7 +61,7 @@ npm install
 ### Step 2: Fill the Config in the UI (recommended)
 1. Start the app:
    ```bash
-   npm run start
+   npm run ui
    ```
 2. Open `http://localhost:3030`.
 3. Go to **Settings** page.
@@ -111,7 +111,7 @@ When cookie expires, the app prompts you during sync. Paste the new cookie and c
 
 ### Step 1: Run the App
 ```bash
-npm run start
+npm run ui
 ```
 Then open `http://localhost:3030`.
 
@@ -131,7 +131,7 @@ Important: if dropdown values are changed but not applied, app warns before star
 
 ### Optional CLI mode
 ```bash
-npm run sync
+npm run cli
 ```
 (Uses terminal flow from `s2y.js`.)
 
@@ -163,7 +163,7 @@ SpotifyToYoutube-No-API-Limits/
   ...
 ```
 
-After copy, start app normally (`npm run start`). Dashboard will load previous local sync history.
+After copy, start app normally (`npm run ui`). Dashboard will load previous local sync history.
 
 ---
 
@@ -175,7 +175,7 @@ After copy, start app normally (`npm run start`). Dashboard will load previous l
 - Spotify playlist discovery returns none: verify Spotify credentials and selected seed playlist.
 - Port already in use: set another port (PowerShell example):
   ```powershell
-  $env:PORT='3040'; npm run start
+  $env:PORT='3040'; npm run ui
   ```
 
 ---

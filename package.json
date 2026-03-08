@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node start.js",
-    "sync": "node s2y.js"
+    "ui": "node ui.js",
+    "cli": "node s2y.js"
   },
   "dependencies": {
     "node-fetch": "^3.3.2",
