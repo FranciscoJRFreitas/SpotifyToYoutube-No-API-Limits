@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S2Y Settings</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="settings">
+    <div class="bg-shape bg-a"></div>
+    <div class="bg-shape bg-b"></div>
+
+    <main class="app">
+      <header class="topbar card">
+        <h1>
+          <span class="spotify-text">Spotify</span>
+          <span class="title-sep">to</span>
+          <span class="youtube-text">YouTube</span>
+          <span class="title-sep">Sync</span>
+        </h1>
+        <nav class="page-nav">
+          <a href="/" data-nav="dashboard" class="nav-link">Dashboard</a>
+          <a href="/settings.html" data-nav="settings" class="nav-link">Settings</a>
+        </nav>
+      </header>
+
+      <section class="card panel config-page">
+        <div class="panel-header">
+          <h2>Configuration</h2>
+          <div class="actions">
+            <button id="reloadConfigBtn" class="btn" type="button">Reload</button>
+            <button id="saveConfigBtn" class="btn primary" type="button">Save</button>
+          </div>
+        </div>
+
+        <form id="configForm" class="config-form" autocomplete="off">
+          <fieldset class="config-group">
+            <legend>Spotify</legend>
+            <label class="field"><span>Client ID</span><input id="spotifyClientId" type="text" /></label>
+            <label class="field"><span>Client Secret</span><input id="spotifyClientSecret" type="text" /></label>
+            <label class="field"><span>Redirect URI</span><input id="spotifyRedirectUri" type="text" /></label>
+            <label class="field"><span>Playlist URL / ID</span><input id="spotifyPlaylistUrl" type="text" /></label>
+          </fieldset>
+
+          <fieldset class="config-group">
+            <legend>YouTube</legend>
+            <label class="field"><span>Playlist URL / ID</span><input id="youtubePlaylistUrl" type="text" /></label>
+          </fieldset>
+
+          <fieldset class="config-group">
+            <legend>YouTube Headers</legend>
+            <label class="field"><span>Content-Type</span><input id="ytContentType" type="text" /></label>
+            <label class="field"><span>Authorization</span><textarea id="ytAuthorization" class="input-area"></textarea></label>
+            <label class="field"><span>Cookie</span><textarea id="ytCookie" class="input-area"></textarea></label>
+            <label class="field"><span>X-Goog-Visitor-Id</span><input id="ytVisitorId" type="text" /></label>
+            <label class="field"><span>X-Origin</span><input id="ytOrigin" type="text" /></label>
+            <label class="field"><span>X-Youtube-Client-Version</span><input id="ytClientVersion" type="text" /></label>
+          </fieldset>
+        </form>
+
+        <p id="configMessage" class="muted"></p>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

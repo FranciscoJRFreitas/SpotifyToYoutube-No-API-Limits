@@ -1,15 +1,23 @@
-# Spotify to YouTube Playlist Sync (No Developer Youtube API required - No quota constraints)
-## Why do I need this and why no developer youtube API required?
-This script transfers tracks from any Spotify playlist to a YouTube playlist automatically. Unlike other solutions, it does not rely on the YouTube Developer API, which often exceeds its daily quota when handling around 100 songs or more (based on my experience), this way you can easily transfer big playlists. It also handles failed tracks, retries them, and maintains progress logs for added and failed tracks in organized folders, so you can always add songs to the transfered spotify playlist and update them to youtube, rerunning this script, from where you left.
+﻿# Spotify to YouTube Playlist Sync (No Developer YouTube API required - No quota constraints)
+## Why do I need this and why no developer YouTube API required?
+This app transfers tracks from Spotify playlists to YouTube playlists without using the YouTube Developer API quota flow. It uses your authenticated YouTube web session headers, so large playlist syncs are practical and resumable. The new version adds a local web UI for live progress, controls, and configuration.
 
 ---
 
 ## Features
-- Transfers songs from any Spotify playlist to a YouTube playlist (~33 tracks/minute).
-- Automatically retries failed tracks.
-- Stores progress logs (`added_songs` and `failed_songs`) in a dedicated folder for each playlist.
-- Allows you to pause or abort the program and resume from where you left off.
-- Prompts to refresh cookies if authentication fails.
+- Sync Spotify playlists to YouTube playlists with local progress tracking.
+- Dashboard UI with:
+  - Start, pause, and resume controls.
+  - Live status, logs, and progress bar.
+  - Spotify and YouTube playlist selectors.
+- Settings page to edit and save `config.json` through form fields.
+- Desktop notifications for:
+  - Sync completed.
+  - Cookie update required.
+- YouTube cookie prompt in-app when cookie expires (paste and continue).
+- Automatic cooldown: after repeated `ERR_TOO_MANY_REDIRECTS`, sync pauses for 5 minutes and auto-resumes.
+- Failed-song retry flow at the end of sync (prompt to retry remaining failed tracks).
+- Local history per playlist (added/failed files + profile metadata).
 
 ---
 
@@ -22,99 +30,160 @@ This script transfers tracks from any Spotify playlist to a YouTube playlist aut
 ## Installation
 
 ### Step 1: Clone the Repository
-Clone this repository to your local machine:
 ```bash
 git clone https://github.com/FranciscoJRFreitas/SpotifyToYoutube-No-API-Limits.git
 ```
 
 Navigate to the project directory:
-```
+```bash
 cd SpotifyToYoutube-No-API-Limits
 ```
+
 ### Step 2: Install Dependencies
-Run the following command to install the required packages:
-```
+```bash
 npm install
 ```
+
+---
+
 ## Configuration
 
-### Step 0: Create an Empty (or use existing) Youtube Playlist
-
-[Guide on how to create a playlist on Web](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DDesktop) (Pretty straight forward)
+### Step 0: Create an Empty (or existing) YouTube Playlist
+[Guide: create a YouTube playlist on desktop](https://support.google.com/youtube/answer/57792?hl=en&co=GENIE.Platform%3DDesktop)
 
 ### Step 1: Obtain Spotify API Credentials
-
 1. Log in to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Create an app and get:
+   - `clientId`
+   - `clientSecret`
+3. Keep `redirectUri` as `http://localhost:8080/callback`.
 
-2. Create an application and retrieve the Client ID and Client Secret.
+### Step 2: Fill the Config in the UI (recommended)
+1. Start the app:
+   ```bash
+   npm run start
+   ```
+2. Open `http://localhost:3030`.
+3. Go to **Settings** page.
+4. Fill Spotify and YouTube fields and click **Save**.
 
-### Step 2: Edit the ***config.json*** File
+The app writes values directly to `config.json`.
 
+### Expected `config.json` shape
 ```json
 {
   "spotify": {
     "clientId": "your_client_id",
     "clientSecret": "your_client_secret",
-    "redirectUri": "http://localhost:8080/callback", // No need to change
-    "playlistURL": "https://open.spotify.com/playlist{playlistId}?si={si}" // Spotify playlist being copied - Handles different formats, you can simply copy the playlist URL directly from the spotify share functionality
+    "redirectUri": "http://localhost:8080/callback",
+    "playlistURL": "spotify_playlist_id_or_url"
   },
   "youtube": {
-    "playlistURL": "https://www.youtube.com/playlist?list={playlist}", // Youtube target playlist - Handles different formats, you can simply copy the playlist URL directly from the browser in the playlist page, after creating it
-    "headers": { // Instructions below
-      "Content-Type": "application/json", // don't change
-      "Authorization": "SAPISIDHASH ... ", // change according to instructions below
-      "Cookie": "__Secure-3PSID= ... wide=1", // change according to instructions below
-      "X-Goog-Visitor-Id": "...", // change according to instructions below
-      "X-Origin": "https://www.youtube.com", // don't change
-      "X-Youtube-Client-Version": "2.20250116.10.00" // check headers version
+    "playlistURL": "youtube_playlist_id_or_url",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "SAPISIDHASH ...",
+      "Cookie": "__Secure-3PSID=...",
+      "X-Goog-Visitor-Id": "...",
+      "X-Origin": "https://www.youtube.com",
+      "X-Youtube-Client-Version": "2.x.x"
     }
   }
 }
 ```
 
-#### ***Important Info***
+### How to collect YouTube header values
+1. Open [YouTube](https://www.youtube.com) and sign in with the target account.
+2. Open browser DevTools (`F12`) -> **Network**.
+3. Perform any YouTube search.
+4. Filter by `v1/search` and open one request.
+5. Copy required request headers:
+   - `Authorization`
+   - `Cookie`
+   - `X-Goog-Visitor-Id`
+   - `X-Youtube-Client-Version` (if needed)
 
-For the headers segment in this configuration, open [Youtube](https://www.youtube.com) and login to your desired account with the target playlist. After that, open Developer Tools of your browser (*Press F12 key to toggle*) switch to *"Network"* tab and perform a search action in Youtube (i.e. search for any video). In the developer tools, filter by *"v1/search"* and inspect any request made. Scroll down to *"Request Headers"* and there you have all the header parameters you need to copy from your session: ***Authorization***, ***Cookie***, ***X-Goog-Visitor-Id*** and eventually ***X-Youtube-Client-Version***.
+When cookie expires, the app prompts you during sync. Paste the new cookie and continue.
 
-Use this process to update the ***Cookie*** header, when required/prompted.
-
-*Tip: You can easily copy any value by pressing right click on the header and "Copy Value".*
+---
 
 ## Usage
 
-### Step 1: Run the Script
-Run the following command:
-
+### Step 1: Run the App
 ```bash
-node s2y.js
+npm run start
 ```
+Then open `http://localhost:3030`.
+
+### Step 2: Select Active Playlists
+In **Dashboard**:
+1. Choose Spotify source and YouTube target playlists from dropdowns.
+2. Click **Apply Selection** to write selected IDs to `config.json`.
+
+Important: if dropdown values are changed but not applied, app warns before starting sync.
+
+### Step 3: Start and Control Sync
+- **Start Sync**: starts transfer using the applied config.
+- **Pause** / **Resume**: controls running sync.
+- If cookie is invalid: prompt appears, paste cookie, continue.
+- If repeated redirects happen: app pauses 5 minutes and auto-resumes.
+- If failed songs remain at end: app prompts retry decision.
+
+### Optional CLI mode
+```bash
+npm run sync
+```
+(Uses terminal flow from `s2y.js`.)
+
+---
 
 ## File Structure
-If you decided to use this script to migrate more than one playlist, each one will have its own folder in the *playlists/* directory:
+Each playlist keeps its own local state under `playlists/`:
 
-```
+```text
 playlists/
-├── Playlist Name/
-│   ├── added_songs_<playlist_id>.txt
-│   └── failed_songs_<playlist_id>.txt
+  Playlist Name/
+    added_songs_<spotify_playlist_id>.txt
+    failed_songs_<spotify_playlist_id>.txt
+    playlist_profile.json
 ```
 
-- added_songs_<playlist_id>.txt: Tracks successfully added to the YouTube playlist.
-- failed_songs_<playlist_id>.txt: Tracks that failed to transfer.
+- `added_songs_...txt`: successfully added tracks.
+- `failed_songs_...txt`: failed tracks pending retry.
+- `playlist_profile.json`: local metadata/history used by dashboard selectors.
+
+### Keep previous sync status when moving machines or reinstalling
+To preserve progress/history, copy your existing `playlists` folder into the project root:
+
+```text
+SpotifyToYoutube-No-API-Limits/
+  playlists/   <-- copy this folder here
+  config.json
+  start.js
+  ...
+```
+
+After copy, start app normally (`npm run start`). Dashboard will load previous local sync history.
+
+---
 
 ## Troubleshooting
 ### Common Issues
-- Missing config.json: Ensure the config.json file exists in the root directory.
-- Invalid YouTube Cookie: If the script prompts you to update the YouTube Cookie, refresh it and rerun the script.
-- API Errors: Ensure that your Spotify and YouTube credentials are correct.
+- Missing `config.json`: open Settings and save valid config.
+- Invalid YouTube cookie: update cookie when prompted.
+- Start sync warning about unapplied selection: click **Apply Selection** first.
+- Spotify playlist discovery returns none: verify Spotify credentials and selected seed playlist.
+- Port already in use: set another port (PowerShell example):
+  ```powershell
+  $env:PORT='3040'; npm run start
+  ```
+
+---
 
 ## Contributing
+If you have feature requests, suggestions, or feedback, you can [reach out here](https://franciscofreitas.netlify.app/).
 
-If you have any feature requests, suggestions, or feedback, feel free to [reach out to me](https://franciscofreitas.netlify.app/). Your support is greatly appreciated! Here’s how you can help:
-
-- 📈 Contribute by improving this tool.
-- ⭐ Star this project and share it with others who might find it useful.
-- ☕ [Buy me a coffee (or a home)](https://paypal.me/franfreitas2002) to support my work.
-
-
-
+Ways to help:
+- Improve this tool with pull requests.
+- Star and share the project.
+- Support development: [Buy me a coffee (or a home)](https://paypal.me/franfreitas2002)

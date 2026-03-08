@@ -1,0 +1,123 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S2Y Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="dashboard">
+    <div class="bg-shape bg-a"></div>
+    <div class="bg-shape bg-b"></div>
+
+    <main class="app">
+      <header class="topbar card">
+        <h1>
+          <span class="spotify-text">Spotify</span>
+          <span class="title-sep">to</span>
+          <span class="youtube-text">YouTube</span>
+          <span class="title-sep">Sync</span>
+        </h1>
+        <nav class="page-nav">
+          <a href="/" data-nav="dashboard" class="nav-link">Dashboard</a>
+          <a href="/settings.html" data-nav="settings" class="nav-link">Settings</a>
+        </nav>
+      </header>
+
+      <section class="hero card">
+        <p>Pick active playlists, then run and monitor sync status live.</p>
+
+        <div class="selection-grid">
+          <label class="field compact">
+            <span>Selected Spotify Source Playlist</span>
+            <div class="selector-inline">
+              <select id="activeSpotifySelect"></select>
+              <button
+                id="fetchSpotifyPlaylistsBtn"
+                class="icon-btn"
+                type="button"
+                title="Reload Spotify playlists"
+                aria-label="Reload Spotify playlists"
+              >&#x21bb;</button>
+            </div>
+            <p id="spotifyFetchMsg" class="muted selector-msg"></p>
+          </label>
+
+          <label class="field compact">
+            <span>Selected YouTube Target Playlist</span>
+            <div class="selector-inline">
+              <select id="activeYoutubeSelect"></select>
+            </div>
+          </label>
+        </div>
+
+        <div class="hero-actions">
+          <button id="applyActivePlaylistsBtn" class="btn">Apply Selection</button>
+          <button id="startSyncBtn" class="btn primary">Start Sync</button>
+          <button id="pauseSyncBtn" class="btn warn">Pause</button>
+          <button id="resumeSyncBtn" class="btn">Resume</button>
+          <button id="refreshDataBtn" class="btn">Refresh Data</button>
+        </div>
+
+        <p id="activeSelectionMsg" class="muted"></p>
+
+        <div class="pair-state">
+          <p id="runningPair" class="muted">Currently syncing: -</p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card panel status-panel">
+          <h2>Live Status</h2>
+          <div id="statusBadge" class="badge idle">Idle</div>
+          <div class="progress-wrap">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <p id="progressText" class="muted">0 / 0 (0%)</p>
+          <p id="currentTrack" class="current-track">No active track</p>
+          <p id="lastError" class="error"></p>
+        </article>
+
+        <article class="card panel logs-panel">
+          <h2>Activity Log</h2>
+          <div id="logs" class="logs"></div>
+        </article>
+      </section>
+
+      <section class="grid single">
+        <article class="card panel playlists-panel">
+          <h2>Synced Playlists (Local)</h2>
+          <div id="playlists" class="playlists"></div>
+        </article>
+      </section>
+    </main>
+
+    <div id="cookieModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <h3>YouTube Cookie Required</h3>
+        <p id="cookiePromptText" class="muted">
+          The current cookie expired. Paste a fresh YouTube Cookie to continue this sync.
+        </p>
+        <textarea id="cookieInput" class="cookie-input" placeholder="Paste full Cookie header value"></textarea>
+        <p id="cookieError" class="error"></p>
+        <div class="modal-actions">
+          <button id="submitCookieBtn" class="btn primary">Update Cookie & Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="retryModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <h3>Failed Songs Remaining</h3>
+        <p id="retryPromptText" class="muted"></p>
+        <ul id="retrySongs" class="retry-list"></ul>
+        <div class="modal-actions between">
+          <button id="retryStopBtn" class="btn">Stop</button>
+          <button id="retryContinueBtn" class="btn primary">Retry Failed Songs</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

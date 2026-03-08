@@ -3,7 +3,7 @@
     "clientId": "your_client_id",
     "clientSecret": "your_client_secret",
     "redirectUri": "http://localhost:8080/callback",
-    "playlistURL": "https://open.spotify.com/playlist{playlistId}?si={si}"
+    "playlistURL": "https://open.spotify.com/playlist/{playlistId}?si={si}"
   },
   "youtube": {
     "playlistURL": "https://www.youtube.com/playlist?list={playlist}",
