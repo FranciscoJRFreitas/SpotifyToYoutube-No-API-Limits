@@ -1,19 +1,38 @@
 {
-  "spotify": {
-    "clientId": "your_client_id",
-    "clientSecret": "your_client_secret",
-    "redirectUri": "http://localhost:8080/callback",
-    "playlistURL": "https://open.spotify.com/playlist/{playlistId}?si={si}"
-  },
-  "youtube": {
-    "playlistURL": "https://www.youtube.com/playlist?list={playlist}",
-    "headers": {
-      "Content-Type": "application/json",
-      "Authorization": "SAPISIDHASH ... ",
-      "Cookie": "__Secure-3PSID= ... wide=1",
-      "X-Goog-Visitor-Id": "...",
-      "X-Origin": "https://www.youtube.com",
-      "X-Youtube-Client-Version": "2.20250116.10.00"
+  "spotifyClientId": "e3272a55c8b14ba9a2771b259f534528",
+  "spotifyClientSecret": "ecfe31dca4ce4eadb68addb044810d45",
+  "spotifyAccessToken": "BQAvUP8KaOUT4RRcJjMd3bdCwJmkYVdgbF8uBgHHoCV_R8nBENc0Loqt-NL0c__6E90reTEQXX08xrFGvdYLwmlqldnV8i1IlW6RceDEIFiBJyROxX0OgnsTHcnxj00_9Gz5bBVAesIHzSIp3bu_pJYBaypmdlhjSF33lZWZr-x102VT9wh8yORrMN5iUclwSUxJs4vLNosYZ0e73VeN3k0yPX8_mtUwPtrhI0_hkoKE8--bg7YAs2edH5g",
+  "spotifyRefreshToken": "AQB1lZe6-2fCAWLdsqtmBRxl-DYbo0mvRrc5vzdACCH8Sz3geSmkPPtt2fKWTMkm-GKEN6EbvWDczLPtpxXQHxPXNFfff9l8QM_1Q75Ir1-3bOWh76W_rwPappYLFgQhZmc",
+  "spotifyExpiresAt": 1773094619405,
+  "spotifyUserId": "11175200599",
+  "spotifyUserName": "Francisco Freitas",
+  "ytCookie": "__Secure-ROLLOUT_TOKEN=CN6Z84iMy_ebeRDI-du0s5uSAxjI-du0s5uSAw%3D%3D; VISITOR_PRIVACY_METADATA=CgJQVBIiEh4SHAsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicgXA%3D%3D; __Secure-1PSIDTS=sidts-CjUBBj1CYhiUzxPODeRz9pTAuYoA2nm3z_2bH7EiP1c1Mpt3FS7u9SPRCJg9RAQSPrddR1nexBAA; __Secure-3PSIDTS=sidts-CjUBBj1CYhiUzxPODeRz9pTAuYoA2nm3z_2bH7EiP1c1Mpt3FS7u9SPRCJg9RAQSPrddR1nexBAA; HSID=Az8iESJUQ68PhEDAT; SSID=Apy8Z8FqFJJwpaugT; APISID=I9IS1AOkT7yPk6gL/AOFRkx43K53wteaun; SAPISID=M0eZ4JIzov2nU5mF/A3EoD9bFzokPujHwP; __Secure-1PAPISID=M0eZ4JIzov2nU5mF/A3EoD9bFzokPujHwP; __Secure-3PAPISID=M0eZ4JIzov2nU5mF/A3EoD9bFzokPujHwP; SID=g.a0007Qhp-n2hKStUZuFiPYcBnHrfS8orTARC5GDrWr6lIxlylrfRZaUcMOx5cxzmBoBvAiAQ3gACgYKAfgSARASFQHGX2MiMgWal0G7Y4DI_7j2qTCPtxoVAUF8yKpBL91U-nmP8wahK77S0F8z0076; __Secure-1PSID=g.a0007Qhp-n2hKStUZuFiPYcBnHrfS8orTARC5GDrWr6lIxlylrfRFXt2b4FtM4_GjKXtwPnjagACgYKAaESARASFQHGX2Mi8372tU-WZcVk5gJdft9fmxoVAUF8yKr2MzoaTpiNv1mTmrt93GwY0076; __Secure-3PSID=g.a0007Qhp-n2hKStUZuFiPYcBnHrfS8orTARC5GDrWr6lIxlylrfRO83apQrOb5XpAiYUtV-P-gACgYKAXMSARASFQHGX2MiYmC3xPdMd2Mgi3jYc9p4gBoVAUF8yKoSEgxP241O2PnH3wiLRcJ10076; __Secure-YEC=CgtXY1V5VldrS2diTSjS8rzNBjIoCgJQVBIiEh4SHAsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicgXA%3D%3D; __Secure-ROLLOUT_TOKEN=CN6Z84iMy_ebeRDI-du0s5uSAxjOwJCj35OTAw%3D%3D; SIDCC=AKEyXzXPVbazZVvJtbcvp7U3lWa9cnWiFUONopC0pI1nHeKfJtav_4m5fBceA1L4E067miNp5A; __Secure-1PSIDCC=AKEyXzUVhd1QAjiTh06HfM1QgxsXbLEoCmAKGKDWOrTi4TCWQoJE4wMVLfYaQRRaYq8UTYA3fw; __Secure-3PSIDCC=AKEyXzV8Og9ZjlUn2VKMgF111Vrgkt1LAgDJYnITiAhC5xfNlLAxLx5Cx-yzkOPKmIYJKlNdQA; PREF=f6=40000000&tz=Europe.London&f5=30000&f7=100; LOGIN_INFO=AFmmF2swRQIhAP8ZJz80slR2G9l0g4NoK1mlV1XZ7XSwtHHqMKohvI_QAiBNdIZuLOT6_28YBLT6a-8-AOZ42nDfFEXxnTWfcEz6zQ:QUQ3MjNmeXZiVlBEV2R2UDRMcGZGYXVuWFlyVXJRX1puM1F4TXoxNi1ZcTV6amVjQW9CMHg5R2pnRHl4a3N5ekt0d2NxdHlrY1F3Q1hLVTE1d0tkS1hJWGV4Ukp2MGVQWG42Nnk1OWxNWjZ6ZHFlci1zdl85dHJybDNKWDFCOUFqbVF1VDR5Zm1saThLNEFVcVMyREJuLUVLT2Z1dDViUkRB; YSC=BjoARl_nCTE; wide=1",
+  "syncMeta": {
+    "2eVSGcnORfr0pDLDVKPZDt": {
+      "spPlaylist": {
+        "id": "2eVSGcnORfr0pDLDVKPZDt",
+        "name": "Freedom",
+        "trackCount": 5374,
+        "image": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da848349d8a72f86255f34644fa9"
+      },
+      "ytPlaylist": {
+        "id": "PLaq3zFACfmARTrkbNukxp26yN-1B0R6OS",
+        "name": "PLaq3zFACfmARTrkbNukxp26yN-1B0R6OS"
+      },
+      "date": "2026-03-09T21:34:51.280Z"
+    },
+    "7IZa4muy6BpKYsF2Yv7uSr": {
+      "spPlaylist": {
+        "id": "7IZa4muy6BpKYsF2Yv7uSr",
+        "name": "Reaching Zenith",
+        "trackCount": 1647,
+        "image": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84471a7db9969331c43d7dcd56"
+      },
+      "ytPlaylist": {
+        "id": "PLaq3zFACfmATW8FmnPzZp-UoT4Yn-PekU",
+        "name": "PLaq3zFACfmATW8FmnPzZp-UoT4Yn-PekU"
+      },
+      "date": "2026-03-09T22:02:25.542Z"
     }
   }
 }

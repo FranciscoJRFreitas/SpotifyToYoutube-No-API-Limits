@@ -6,6 +6,7 @@ This repository is **unmaintained** and is kept for archival/reference purposes 
 
 **Suggested replacement:** use an actively maintained migration tool/service such as [TuneMyMusic](https://www.tunemymusic.com/) or [Soundiiz](https://soundiiz.com/).
 
+Since March 9th, 2026, Spotify API updates have broken this project's core functionality (syncing Spotify playlists to YouTube). This project functionality was affected and probably hasn't a fix, unless you have the Spotify Premium subscription, given the API restrictions for third-party applications. Given the time investment required and the availability of alternative solutions, I have decided not to maintain this project anymore.
 ---
 
 # Syncify - Spotify x YouTube

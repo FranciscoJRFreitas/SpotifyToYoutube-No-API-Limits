@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Syncify — Spotify × YouTube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f; --bg2: #111118; --bg3: #18181f; --card: #1c1c26;
+  --border: #2a2a38; --border2: #35354a;
+  --green: #1db954; --green2: #1ed760;
+  --yellow: #f5a623; --blue: #4a8cff;
+  --text: #f0f0f8; --text2: #a0a0b8; --text3: #606078;
+  --accent: #7c5cfc; --accent2: #9b7ffe;
+  --yt: #ff0000; --yt2: #ff4444;
+  --radius: 14px; --radius-sm: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(29,185,84,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; bottom: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(255,0,0,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+  background: rgba(10,10,15,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+}
+.nav-logo .logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--green), var(--yt));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.nav-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 4px;
+}
+.nav-tab {
+  padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  color: var(--text2); cursor: pointer; transition: all 0.2s; border: none; background: transparent;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.nav-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); transition: background 0.3s; }
+.status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(29,185,84,0.5); }
+
+/* PAGES */
+.page { display: none; padding: 32px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.page.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* HERO */
+.hero { text-align: center; padding: 48px 0 40px; }
+.hero h1 {
+  font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800; letter-spacing: -2px; line-height: 1.05; margin-bottom: 14px;
+}
+.hero h1 .sp { color: var(--green); }
+.hero h1 .yt { color: var(--yt); }
+.hero p { color: var(--text2); font-size: 16px; max-width: 480px; margin: 0 auto 32px; line-height: 1.6; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; transition: border-color 0.2s; }
+.card:hover { border-color: var(--border2); }
+
+/* INPUTS */
+.input-group { margin-bottom: 14px; }
+label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.3px; }
+input, select, textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 14px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+}
+input::placeholder { color: var(--text3); }
+input[type="password"] { font-family: 'DM Mono', monospace; letter-spacing: 2px; }
+.input-row { display: flex; gap: 10px; }
+.input-row .input-group { flex: 1; }
+select {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23606078' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+}
+select option { background: var(--bg2); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; border: none; white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: white; box-shadow: 0 2px 12px rgba(124,92,252,0.35); }
+.btn-primary:hover:not(:disabled) { background: var(--accent2); box-shadow: 0 4px 20px rgba(124,92,252,0.5); }
+.btn-green { background: var(--green); color: #000; box-shadow: 0 2px 12px rgba(29,185,84,0.35); }
+.btn-green:hover:not(:disabled) { background: var(--green2); }
+.btn-red { background: var(--yt); color: white; box-shadow: 0 2px 12px rgba(255,0,0,0.3); }
+.btn-red:hover:not(:disabled) { background: var(--yt2); }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--border2); background: var(--bg3); }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-lg { padding: 13px 28px; font-size: 15px; font-weight: 600; }
+
+/* BADGE */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-green { background: rgba(29,185,84,0.15); color: var(--green2); }
+.badge-yellow { background: rgba(245,166,35,0.15); color: var(--yellow); }
+.badge-red { background: rgba(255,0,0,0.15); color: var(--yt2); }
+.badge-gray { background: rgba(96,96,120,0.3); color: var(--text2); }
+
+/* SYNC LAYOUT */
+.sync-layout {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 20px; align-items: start; margin-bottom: 28px;
+}
+@media (max-width: 768px) { .sync-layout { grid-template-columns: 1fr; } }
+.sync-arrow {
+  display: flex; align-items: center; justify-content: center;
+  padding-top: 50px; color: var(--text3); font-size: 22px;
+  flex-direction: column; gap: 6px;
+}
+.playlist-selector { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.playlist-selector-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+}
+.playlist-selector-header.sp-h { border-top: 2px solid var(--green); }
+.playlist-selector-header.yt-h { border-top: 2px solid var(--yt); }
+.playlist-list { max-height: 300px; overflow-y: auto; }
+.playlist-list::-webkit-scrollbar { width: 4px; }
+.playlist-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.playlist-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; cursor: pointer; transition: background 0.15s;
+  border-bottom: 1px solid rgba(42,42,56,0.5);
+}
+.playlist-item:last-child { border-bottom: none; }
+.playlist-item:hover { background: var(--bg3); }
+.playlist-item.selected { background: rgba(124,92,252,0.1); border-left: 2px solid var(--accent); }
+.playlist-thumb {
+  width: 44px; height: 44px; border-radius: 6px; background: var(--bg2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text3); overflow: hidden;
+}
+.playlist-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.playlist-info { flex: 1; min-width: 0; }
+.playlist-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.playlist-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.playlist-check { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
+.playlist-item.selected .playlist-check { opacity: 1; }
+
+/* PROGRESS */
+.progress-container { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+.progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.progress-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+.progress-controls { display: flex; gap: 8px; }
+.progress-track { height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--green), var(--accent));
+  border-radius: 4px; transition: width 0.4s ease; position: relative;
+}
+.progress-fill.active::after {
+  content: ''; position: absolute; right: 0; top: 0; width: 20px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer { 0%,100% { opacity: 0; } 50% { opacity: 1; } }
+.progress-stats { display: flex; gap: 24px; font-size: 12px; color: var(--text2); flex-wrap: wrap; }
+.progress-stat strong { color: var(--text); font-weight: 600; }
+.stat-green { color: var(--green) !important; }
+.stat-red { color: var(--yt2) !important; }
+
+/* LOG */
+.log-container { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
+.log-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text2); display: flex; align-items: center; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.5px; }
+.log-body { font-family: 'DM Mono', monospace; font-size: 12px; max-height: 200px; overflow-y: auto; padding: 12px 16px; }
+.log-body::-webkit-scrollbar { width: 4px; }
+.log-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.log-line { padding: 2px 0; display: flex; gap: 10px; color: var(--text2); line-height: 1.5; }
+.log-time { color: var(--text3); flex-shrink: 0; }
+.log-line.success .log-msg { color: var(--green); }
+.log-line.error .log-msg { color: var(--yt2); }
+.log-line.warn .log-msg { color: var(--yellow); }
+.log-line.info .log-msg { color: var(--blue); }
+
+/* BANNERS */
+.pause-banner {
+  display: none; align-items: center; gap: 12px;
+  padding: 14px 20px; background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.3); border-radius: var(--radius-sm);
+  margin-bottom: 16px; font-size: 14px; color: var(--yellow); font-weight: 500;
+}
+.pause-banner.visible { display: flex; }
+.tip {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  background: rgba(74,140,255,0.08); border: 1px solid rgba(74,140,255,0.2);
+  border-radius: var(--radius-sm); font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5;
+}
+.tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.warning {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.25);
+  border-radius: var(--radius-sm); font-size: 13px; color: var(--yellow); margin-bottom: 20px; line-height: 1.5;
+}
+.error-banner {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  background: rgba(255,0,0,0.08); border: 1px solid rgba(255,0,0,0.25);
+  border-radius: var(--radius-sm); font-size: 13px; color: var(--yt2); margin-bottom: 20px; line-height: 1.5;
+}
+
+/* HISTORY */
+.synced-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.synced-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: all 0.2s; }
+.synced-item:hover { border-color: var(--border2); transform: translateY(-1px); }
+.synced-item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.synced-icons { display: flex; align-items: center; }
+.synced-icons span { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.synced-icons span:last-child { margin-left: -8px; z-index: 1; }
+.synced-sp { background: rgba(29,185,84,0.15); }
+.synced-yt { background: rgba(255,0,0,0.15); }
+.synced-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.synced-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text2); margin-bottom: 10px; }
+.synced-progress { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-bottom: 14px; }
+.synced-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--accent)); border-radius: 2px; }
+.synced-actions { display: flex; gap: 8px; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius);
+  width: 100%; max-width: 480px; padding: 28px;
+  transform: scale(0.95) translateY(10px); transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.modal-close { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--bg3); border: 1px solid var(--border); cursor: pointer; color: var(--text2); font-size: 18px; transition: all 0.15s; }
+.modal-close:hover { color: var(--text); border-color: var(--border2); }
+.modal-body { margin-bottom: 20px; color: var(--text2); font-size: 14px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* TOAST */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius);
+  min-width: 300px; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  pointer-events: all; animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+.toast.removing { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut { to { opacity: 0; transform: translateX(20px); } }
+.toast-icon { font-size: 20px; flex-shrink: 0; }
+.toast-title { font-size: 13px; font-weight: 600; }
+.toast-msg { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* MISC */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.empty-state p { font-size: 14px; max-width: 300px; margin: 0 auto; line-height: 1.6; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: currentColor; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.section-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.settings-section { margin-bottom: 32px; }
+.settings-section-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+.connected-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(29,185,84,0.08); border: 1px solid rgba(29,185,84,0.2); border-radius: var(--radius-sm); font-size: 13px; color: var(--green); margin-bottom: 14px; }
+.uri-box { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius-sm); }
+.uri-box code { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); flex: 1; word-break: break-all; }
+.sync-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">🎵</div>
+    Syncify
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('sync')" id="tab-sync">⇄ Sync</button>
+    <button class="nav-tab" onclick="showPage('history')" id="tab-history">📋 History</button>
+    <button class="nav-tab" onclick="showPage('settings')" id="tab-settings">⚙️ Settings</button>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot" id="spStatusDot"></div>
+    <span id="spStatusText">Not connected</span>
+  </div>
+</nav>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal: YouTube Cookie -->
+<div class="modal-overlay" id="ytCookieModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><span style="color:var(--yt)">▶</span> Update YouTube Cookie</div>
+      <div class="modal-close" onclick="closeModal('ytCookieModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">Your YouTube session cookie has expired. Provide a fresh one to continue.</p>
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>Open <strong>youtube.com</strong> → DevTools (F12) → Application → Cookies → copy the full cookie string for <strong>youtube.com</strong></span>
+      </div>
+      <div class="input-group">
+        <label>YouTube Cookie</label>
+        <textarea id="modalCookieInput" rows="4" placeholder="VISITOR_INFO1_LIVE=...; YSC=...; CONSENT=..." style="font-family:'DM Mono',monospace;font-size:11px;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('ytCookieModal')">Cancel</button>
+      <button class="btn btn-red" onclick="saveNewCookie()">💾 Save & Resume</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Spotify Auth -->
+<div class="modal-overlay" id="spotifyAuthModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><span style="color:var(--green)">🎵</span> Connect Spotify</div>
+      <div class="modal-close" onclick="closeModal('spotifyAuthModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:14px">Authorize Syncify to access your Spotify playlists.</p>
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>You'll be redirected to Spotify to log in. After approving, you'll come back here automatically.</span>
+      </div>
+      <p style="font-size:13px;color:var(--text2)">Make sure this redirect URI is added in your Spotify app settings:</p>
+      <div class="uri-box" style="margin-top:10px">
+        <code id="modalRedirectUri">http://localhost:4040/</code>
+        <button class="btn btn-ghost btn-sm" onclick="copyText(document.getElementById('modalRedirectUri').textContent, this)">📋 Copy</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('spotifyAuthModal')">Cancel</button>
+      <button class="btn btn-green" onclick="doSpotifyOAuth()">🎵 Connect Spotify</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Create YT Playlist -->
+<div class="modal-overlay" id="createYtModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><span style="color:var(--yt)">+</span> New YouTube Playlist</div>
+      <div class="modal-close" onclick="closeModal('createYtModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="warning">
+        <span>⚠️</span>
+        <span>YouTube's API requires OAuth for playlist creation. Instead, create a playlist manually on YouTube, then paste its ID or URL here.</span>
+      </div>
+      <div class="input-group">
+        <label>Playlist name (for display)</label>
+        <input type="text" id="newYtName" placeholder="e.g. My Spotify Mix" />
+      </div>
+      <div class="input-group">
+        <label>YouTube Playlist ID or URL</label>
+        <input type="text" id="newYtId" placeholder="PLxxxxxxxxxx or youtube.com/playlist?list=..." />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('createYtModal')">Cancel</button>
+      <button class="btn btn-red" onclick="addYtPlaylist()">▶ Add Playlist</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SYNC PAGE ========== -->
+<div class="page active" id="page-sync">
+  <div class="pause-banner" id="rateLimitBar">
+    ⏸ Rate limit hit. Auto-resuming in <strong id="rateLimitCountdown" style="font-family:'DM Mono',monospace;margin-left:6px">2:00</strong>
+  </div>
+
+  <!-- Progress section (shown during sync) -->
+  <div id="progressSection" style="display:none">
+    <div class="progress-container">
+      <div class="progress-header">
+        <div>
+          <div class="progress-title" id="progressTitle">Syncing...</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px" id="progressSubtitle"></div>
+        </div>
+        <div class="progress-controls">
+          <button class="btn btn-ghost btn-sm" id="pauseResumeBtn" onclick="togglePause()">⏸ Pause</button>
+          <button class="btn btn-ghost btn-sm" onclick="stopSync()">⏹ Stop</button>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill active" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-stats">
+        <div class="progress-stat">Total: <strong id="statTotal">0</strong></div>
+        <div class="progress-stat">Added: <strong class="stat-green" id="statDone">0</strong></div>
+        <div class="progress-stat">Failed: <strong class="stat-red" id="statFailed">0</strong></div>
+        <div class="progress-stat">Skipped: <strong id="statSkipped">0</strong></div>
+      </div>
+    </div>
+    <div class="log-container">
+      <div class="log-header">
+        <span>📟 Sync Log</span>
+        <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear</button>
+      </div>
+      <div class="log-body" id="logBody"></div>
+    </div>
+    <button class="btn btn-ghost" onclick="backToSetup()" style="margin-bottom:24px">← Back to Setup</button>
+  </div>
+
+  <!-- Setup section -->
+  <div id="syncSetupSection">
+    <div class="hero">
+      <h1><span class="sp">Spotify</span> × <span class="yt">YouTube</span></h1>
+      <p>Sync your Spotify playlists to YouTube — with real file persistence, pause/resume, and automatic retry.</p>
+    </div>
+
+    <div id="spAuthBanner" class="warning" style="display:none">
+      <span>⚠️</span>
+      <span>Spotify not connected. Go to <a onclick="showPage('settings')" style="color:var(--yellow);cursor:pointer;text-decoration:underline">Settings</a> to connect.</span>
+    </div>
+    <div id="ytCookieBanner" class="error-banner" style="display:none">
+      <span>🍪</span>
+      <span>YouTube cookie missing. <a onclick="openModal('ytCookieModal')" style="color:var(--yt2);cursor:pointer;text-decoration:underline">Add cookie</a> to enable syncing.</span>
+    </div>
+
+    <div class="sync-layout">
+      <!-- Spotify side -->
+      <div class="playlist-selector">
+        <div class="playlist-selector-header sp-h">
+          <span style="color:var(--green)">🎵</span> Spotify Playlist
+          <span style="margin-left:auto">
+            <button class="btn btn-ghost btn-sm" onclick="loadSpotifyPlaylists(true)">↺</button>
+          </span>
+        </div>
+        <div class="playlist-list" id="spotifyPlaylistList">
+          <div class="empty-state" style="padding:32px">
+            <p>Connect Spotify in Settings to see your playlists.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sync-arrow">
+        <span>→</span>
+        <span style="font-size:10px;letter-spacing:1px;text-transform:uppercase">sync</span>
+      </div>
+
+      <!-- YouTube side -->
+      <div class="playlist-selector">
+        <div class="playlist-selector-header yt-h">
+          <span style="color:var(--yt)">▶</span> YouTube Playlist
+          <span style="margin-left:auto">
+            <button class="btn btn-ghost btn-sm" onclick="openModal('createYtModal')">+ New</button>
+          </span>
+        </div>
+        <div class="playlist-list" id="youtubePlaylistList">
+          <div class="empty-state" style="padding:32px">
+            <p>Create or select a YouTube playlist.</p>
+          </div>
+        </div>
+        <div style="padding:14px 16px;border-top:1px solid var(--border)">
+          <div class="input-group" style="margin-bottom:0">
+            <label>Or paste a playlist ID / URL</label>
+            <input id="ytPlaylistInput" type="text" placeholder="PLxxxxxxxxxx or full URL" oninput="onYtInput()" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sync-actions">
+      <button class="btn btn-primary btn-lg" onclick="startSync()" id="syncBtn" disabled style="min-width:200px">
+        ⇄ Start Sync
+      </button>
+      <div id="selectedInfo" style="font-size:13px;color:var(--text2);text-align:center"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== HISTORY PAGE ========== -->
+<div class="page" id="page-history">
+  <div class="section-header">
+    <div class="section-title">📋 Sync History</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="loadHistory()">↺ Refresh</button>
+    </div>
+  </div>
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>History is read directly from the <strong>/playlists/</strong> folder next to this app. Files are never deleted by Syncify.</span>
+  </div>
+  <div id="historyGrid" class="synced-grid">
+    <div class="empty-state"><div class="empty-icon">📭</div><p>No synced playlists yet.</p></div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS PAGE ========== -->
+<div class="page" id="page-settings">
+  <div class="section-title" style="margin-bottom:28px">⚙️ Settings</div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">🎵 Spotify</div>
+    <div class="card">
+      <div id="spConnectedRow" class="connected-row" style="display:none">
+        ✅ Connected as <strong id="spUserName">—</strong>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="disconnectSpotify()">Disconnect</button>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>
+          1. Go to <strong>developer.spotify.com/dashboard</strong> → your app → <strong>Edit Settings</strong><br>
+          2. Add this Redirect URI and click Save:
+        </span>
+      </div>
+      <div class="uri-box" style="margin-bottom:16px">
+        <code id="redirectUriDisplay">http://localhost:4040/</code>
+        <button class="btn btn-ghost btn-sm" onclick="copyText(document.getElementById('redirectUriDisplay').textContent, this)">📋 Copy</button>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Client ID</label>
+          <input type="text" id="spClientId" placeholder="Spotify Client ID" />
+        </div>
+        <div class="input-group">
+          <label>Client Secret</label>
+          <input type="password" id="spClientSecret" placeholder="Spotify Client Secret" />
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="connectSpotify()">🎵 Connect with Spotify</button>
+        <button class="btn btn-ghost" onclick="saveSpotifyCredentials()">💾 Save Credentials</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">▶ YouTube Cookie</div>
+    <div class="card">
+      <div class="warning">
+        <span>⚠️</span>
+        <span>Syncify uses your YouTube session cookie to add videos to playlists. The cookie may expire — you'll be prompted when that happens.</span>
+      </div>
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>Open <strong>youtube.com</strong> → DevTools (F12) → Application → Cookies → copy the full value for <strong>youtube.com</strong></span>
+      </div>
+      <div class="input-group">
+        <label>YouTube Cookie</label>
+        <textarea id="ytCookieInput" rows="3" placeholder="VISITOR_INFO1_LIVE=...; YSC=...; CONSENT=..." style="font-family:'DM Mono',monospace;font-size:11px;resize:vertical"></textarea>
+      </div>
+      <div class="input-group">
+        <label>YouTube Client Version <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+        <input type="text" id="ytClientVersion" placeholder="e.g. 2.20240101.00.00" />
+      </div>
+      <button class="btn btn-ghost" onclick="saveYoutubeSettings()">💾 Save YouTube Settings</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">🔔 Notifications</div>
+    <div class="card">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Get desktop notifications when syncs complete or need your attention.</p>
+      <button class="btn btn-ghost" onclick="requestNotifications()">🔔 Enable Notifications</button>
+      <span id="notifStatus" style="margin-left:12px;font-size:12px;color:var(--text2)"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const REDIRECT_URI = 'http://localhost:4040/';
+
+let cfg = {};  // loaded from server /api/config
+let spotifyPlaylists = [];
+let ytPlaylists = [];  // user-managed list stored in cfg
+let selectedSp = null;
+let selectedYt = null;
+
+// Sync state
+let isRunning = false, isPaused = false, shouldStop = false;
+let pauseResolve = null;
+let addedSongs = new Set(), failedSongs = new Set();
+let syncQueue = [];
+let currentSpPlaylistName = '';
+let currentSpPlaylistId = '';
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+async function init() {
+  await loadConfig();
+  populateSettings();
+  checkSpotifyCallback();
+  updateNavStatus();
+  checkBanners();
+  updateNotifStatus();
+}
+
+async function loadConfig() {
+  try {
+    const r = await fetch('/api/config');
+    cfg = await r.json();
+    // ytPlaylists stored in cfg.ytPlaylists
+    ytPlaylists = cfg.ytPlaylistMeta ? Object.values(cfg.ytPlaylistMeta) : [];
+  } catch(e) {
+    toast('Server error', 'Could not reach the Syncify server', 'error');
+  }
+}
+
+async function saveConfigPatch(patch) {
+  await fetch('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  await loadConfig();
+}
+
+function populateSettings() {
+  document.getElementById('spClientId').value = cfg.spotifyClientId || '';
+  document.getElementById('ytCookieInput').value = '';  // never pre-fill cookie
+  document.getElementById('ytClientVersion').value = cfg.ytClientVersion || '';
+  if (cfg.spotifyUserName) {
+    document.getElementById('spConnectedRow').style.display = 'flex';
+    document.getElementById('spUserName').textContent = cfg.spotifyUserName;
+  }
+}
+
+function updateNavStatus() {
+  const dot = document.getElementById('spStatusDot');
+  const txt = document.getElementById('spStatusText');
+  if (cfg.spotifyAccessToken && cfg.spotifyExpiresAt > Date.now()) {
+    dot.className = 'status-dot connected';
+    txt.textContent = cfg.spotifyUserName || 'Spotify Connected';
+  } else if (cfg.spotifyClientId) {
+    dot.className = 'status-dot';
+    txt.textContent = 'Credentials saved';
+  } else {
+    dot.className = 'status-dot';
+    txt.textContent = 'Not connected';
+  }
+}
+
+function checkBanners() {
+  document.getElementById('spAuthBanner').style.display =
+    !cfg.spotifyClientId ? 'flex' : 'none';
+  document.getElementById('ytCookieBanner').style.display =
+    !cfg.hasYtCookie ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'sync') { checkBanners(); if (cfg.spotifyAccessToken) loadSpotifyPlaylists(); }
+  if (name === 'history') loadHistory();
+  if (name === 'settings') populateSettings();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS & TOASTS
+// ═══════════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function toast(title, msg = '', type = 'info', duration = 4500) {
+  const icons = { success:'✅', error:'❌', warn:'⚠️', info:'ℹ️', cookie:'🍪', complete:'🎉' };
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><div class="toast-text"><div class="toast-title">${esc(title)}</div>${msg?`<div class="toast-msg">${esc(msg)}</div>`:''}</div>`;
+  document.getElementById('toastContainer').appendChild(el);
+  if (duration > 0) setTimeout(() => { el.classList.add('removing'); setTimeout(() => el.remove(), 300); }, duration);
+}
+
+function sendNotification(title, body) {
+  if (Notification?.permission === 'granted') new Notification(title, { body });
+}
+
+function requestNotifications() {
+  if (!('Notification' in window)) return toast('Not supported', '', 'error');
+  Notification.requestPermission().then(p => updateNotifStatus());
+}
+
+function updateNotifStatus() {
+  const el = document.getElementById('notifStatus');
+  if (!('Notification' in window)) { el.textContent = 'Not supported'; return; }
+  el.textContent = { granted: '✅ Enabled', denied: '❌ Blocked', default: 'Not enabled' }[Notification.permission] || '';
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPOTIFY AUTH
+// ═══════════════════════════════════════════════════════════════
+function connectSpotify() {
+  const clientId = document.getElementById('spClientId').value.trim();
+  const clientSecret = document.getElementById('spClientSecret').value.trim();
+  if (!clientId || !clientSecret) {
+    toast('Missing credentials', 'Enter your Client ID and Secret', 'error');
+    return;
+  }
+  // Save creds first, then open auth modal
+  saveConfigPatch({ spotifyClientId: clientId, spotifyClientSecret: clientSecret }).then(() => {
+    openModal('spotifyAuthModal');
+  });
+}
+
+function saveSpotifyCredentials() {
+  const clientId = document.getElementById('spClientId').value.trim();
+  const clientSecret = document.getElementById('spClientSecret').value.trim();
+  if (!clientId) { toast('Enter Client ID', '', 'error'); return; }
+  saveConfigPatch({ spotifyClientId: clientId, spotifyClientSecret: clientSecret }).then(() => {
+    toast('Saved', 'Spotify credentials saved', 'success');
+    checkBanners();
+  });
+}
+
+function doSpotifyOAuth() {
+  closeModal('spotifyAuthModal');
+  const scopes = 'playlist-read-private playlist-read-collaborative user-library-read';
+  const url = `https://accounts.spotify.com/authorize?client_id=${cfg.spotifyClientId}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(scopes)}`;
+  window.location.href = url;
+}
+
+async function checkSpotifyCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (!code) return;
+  window.history.replaceState({}, '', '/');
+  toast('Connecting Spotify...', 'Exchanging authorization code', 'info');
+  try {
+    const r = await fetch('/api/spotify/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirectUri: REDIRECT_URI }),
+    });
+    const data = await r.json();
+    if (data.access_token) {
+      // Fetch user profile
+      const me = await spotifyFetch('/me');
+      if (me && !isFetchError(me) && me.id) {
+        await saveConfigPatch({ spotifyUserId: me.id, spotifyUserName: me.display_name || me.id });
+        await loadConfig();
+      } else if (isFetchError(me)) {
+        console.warn('Could not fetch Spotify user profile:', me.status, me.message);
+        // Still proceed — token is valid even if /me fails
+      }
+      updateNavStatus();
+      populateSettings();
+      toast('Spotify connected!', `Welcome, ${cfg.spotifyUserName || 'Spotify User'}`, 'success');
+      sendNotification('Syncify', 'Spotify connected successfully!');
+      checkBanners();
+      // Force refresh after new login to get fresh playlist data
+      localStorage.removeItem('syncify_sp_playlists');
+      loadSpotifyPlaylists(true);
+    } else {
+      toast('Auth failed', data.error_description || data.error || 'Unknown error', 'error', 8000);
+    }
+  } catch(e) {
+    toast('Auth error', e.message, 'error');
+  }
+}
+
+async function ensureSpotifyToken() {
+  if (cfg.spotifyExpiresAt - Date.now() < 60000) {
+    const r = await fetch('/api/spotify/refresh', { method: 'POST' });
+    const data = await r.json();
+    if (data.access_token) {
+      await loadConfig();
+    }
+  }
+  return cfg.spotifyAccessToken;
+}
+
+async function spotifyFetch(endpoint) {
+  const token = await ensureSpotifyToken();
+  if (!token) return { _fetchError: true, status: 401, message: 'No access token. Please reconnect Spotify.' };
+  let url;
+  if (endpoint.startsWith('https://')) {
+    url = endpoint;
+  } else {
+    const p = endpoint.startsWith('/v1') ? endpoint.slice(3) : endpoint;
+    url = 'https://api.spotify.com/v1' + p;
+  }
+  let r;
+  try {
+    r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  } catch(e) {
+    return { _fetchError: true, status: 0, message: e.message };
+  }
+  if (!r.ok) {
+    let errMsg = 'HTTP ' + r.status;
+    try {
+      const errBody = await r.json();
+      errMsg = errBody?.error?.message || errMsg;
+    } catch {}
+    console.error('Spotify API error', r.status, url, errMsg);
+    return { _fetchError: true, status: r.status, message: errMsg };
+  }
+  return r.json();
+}
+
+function isFetchError(data) { return data && data._fetchError === true; }
+
+function disconnectSpotify() {
+  localStorage.removeItem('syncify_sp_playlists');
+  spotifyPlaylists = [];
+  saveConfigPatch({
+    spotifyAccessToken: '', spotifyRefreshToken: '', spotifyExpiresAt: 0,
+    spotifyUserId: '', spotifyUserName: ''
+  }).then(() => {
+    updateNavStatus();
+    document.getElementById('spConnectedRow').style.display = 'none';
+    const list = document.getElementById('spotifyPlaylistList');
+    list.innerHTML = '<div class="empty-state" style="padding:28px"><p>Connect Spotify in Settings</p></div>';
+    toast('Disconnected', 'Spotify account disconnected', 'info');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SPOTIFY PLAYLISTS
+// ═══════════════════════════════════════════════════════════════
+async function loadSpotifyPlaylists(forceRefresh = false) {
+  const list = document.getElementById('spotifyPlaylistList');
+
+  if (!cfg.spotifyAccessToken) {
+    list.innerHTML = '<div class="empty-state" style="padding:28px"><p>Connect Spotify in Settings</p></div>';
+    return;
+  }
+
+  // Try loading from cache first (unless force refresh)
+  if (!forceRefresh) {
+    const cached = localStorage.getItem('syncify_sp_playlists');
+    if (cached) {
+      try {
+        spotifyPlaylists = JSON.parse(cached);
+        renderSpotifyPlaylists();
+        return;
+      } catch {}
+    }
+  }
+
+  list.innerHTML = '<div class="empty-state" style="padding:28px"><div class="spinner" style="margin:0 auto"></div><p style="margin-top:12px">Loading playlists...</p></div>';
+
+  const playlists = [{ id: 'liked', name: '❤️ Liked Songs', trackCount: '—', image: null }];
+
+  let url = '/me/playlists?limit=50';
+  while (url) {
+    const data = await spotifyFetch(url);
+    if (isFetchError(data)) {
+      let msg = data.message || 'Unknown error';
+      let hint = '';
+      if (data.status === 403) {
+        hint = '<br><br><strong>Fix:</strong> The account that created the Spotify app must have Premium AND be added as a test user. Go to <a href="https://developer.spotify.com/dashboard" target="_blank" style="color:var(--yt2)">developer.spotify.com/dashboard</a> → Edit Settings → User Management → add your email. Save, then reconnect.';
+      } else if (data.status === 401) {
+        hint = '<br><br>Token expired — disconnect and reconnect Spotify in Settings.';
+      }
+      list.innerHTML = `<div class="empty-state" style="padding:24px;text-align:left"><p style="color:var(--yt2)">⚠️ ${esc(msg)} (${data.status})</p><p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.6">${hint}</p></div>`;
+      return;
+    }
+    (data.items || []).forEach(pl => {
+      if (pl) playlists.push({ id: pl.id, name: pl.name, trackCount: pl.tracks?.total || 0, image: pl.images?.[0]?.url || null });
+    });
+    url = data.next || null;
+  }
+
+  spotifyPlaylists = playlists;
+  // Cache in localStorage to avoid repeated requests
+  localStorage.setItem('syncify_sp_playlists', JSON.stringify(playlists));
+  renderSpotifyPlaylists();
+}
+
+function renderSpotifyPlaylists() {
+  const list = document.getElementById('spotifyPlaylistList');
+  list.innerHTML = spotifyPlaylists.map(pl => `
+    <div class="playlist-item ${selectedSp?.id === pl.id ? 'selected' : ''}" onclick="selectSp('${pl.id}')">
+      <div class="playlist-thumb">${pl.image ? `<img src="${pl.image}" alt="">` : '🎵'}</div>
+      <div class="playlist-info">
+        <div class="playlist-name">${esc(pl.name)}</div>
+        <div class="playlist-meta">${pl.trackCount} tracks</div>
+      </div>
+      <div class="playlist-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function selectSp(id) {
+  selectedSp = spotifyPlaylists.find(p => p.id === id) || null;
+  renderSpotifyPlaylists();
+  updateSyncBtn();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// YOUTUBE PLAYLISTS
+// ═══════════════════════════════════════════════════════════════
+function renderYtPlaylists() {
+  const list = document.getElementById('youtubePlaylistList');
+  if (!ytPlaylists.length && !selectedYt) {
+    list.innerHTML = '<div class="empty-state" style="padding:28px"><p>Add a playlist below or click + New</p></div>';
+    return;
+  }
+  const all = [...ytPlaylists];
+  if (selectedYt && !all.find(p => p.id === selectedYt.id)) all.unshift(selectedYt);
+  list.innerHTML = all.map(pl => `
+    <div class="playlist-item ${selectedYt?.id === pl.id ? 'selected' : ''}" onclick="selectYt('${esc(pl.id)}', '${esc(pl.name)}')">
+      <div class="playlist-thumb" style="background:rgba(255,0,0,0.1);color:var(--yt)">▶</div>
+      <div class="playlist-info">
+        <div class="playlist-name">${esc(pl.name)}</div>
+        <div class="playlist-meta">${pl.id}</div>
+      </div>
+      <div class="playlist-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function selectYt(id, name) {
+  selectedYt = { id, name };
+  document.getElementById('ytPlaylistInput').value = id;
+  renderYtPlaylists();
+  updateSyncBtn();
+}
+
+function onYtInput() {
+  const val = document.getElementById('ytPlaylistInput').value.trim();
+  if (!val) return;
+  const id = extractPlaylistId(val);
+  selectedYt = { id, name: id };
+  renderYtPlaylists();
+  updateSyncBtn();
+}
+
+function addYtPlaylist() {
+  const name = document.getElementById('newYtName').value.trim();
+  let id = document.getElementById('newYtId').value.trim();
+  if (!id) { toast('Enter a playlist ID or URL', '', 'error'); return; }
+  id = extractPlaylistId(id);
+  if (!name) { toast('Enter a playlist name', '', 'error'); return; }
+  const pl = { id, name };
+  if (!ytPlaylists.find(p => p.id === id)) ytPlaylists.push(pl);
+  // Persist in config
+  const meta = cfg.ytPlaylistMeta || {};
+  meta[id] = pl;
+  saveConfigPatch({ ytPlaylistMeta: meta });
+  selectYt(id, name);
+  closeModal('createYtModal');
+  document.getElementById('newYtName').value = '';
+  document.getElementById('newYtId').value = '';
+  toast('Playlist added', name, 'success');
+}
+
+function extractPlaylistId(url) {
+  const m = url.match(/[?&]list=([^&]+)/);
+  return m ? m[1] : url;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// YOUTUBE SETTINGS
+// ═══════════════════════════════════════════════════════════════
+async function saveYoutubeSettings() {
+  const cookie = document.getElementById('ytCookieInput').value.trim();
+  const version = document.getElementById('ytClientVersion').value.trim();
+  await saveConfigPatch({ ytCookie: cookie || undefined, ytClientVersion: version || undefined });
+  toast('Saved', 'YouTube settings saved', 'success');
+  checkBanners();
+}
+
+async function saveNewCookie() {
+  const cookie = document.getElementById('modalCookieInput').value.trim();
+  if (!cookie) { toast('Enter a cookie', '', 'warn'); return; }
+  await saveConfigPatch({ ytCookie: cookie });
+  document.getElementById('modalCookieInput').value = '';
+  closeModal('ytCookieModal');
+  toast('Cookie updated', 'YouTube cookie saved. Resuming sync...', 'success');
+  if (isPaused) {
+    isPaused = false;
+    document.getElementById('pauseResumeBtn').textContent = '⏸ Pause';
+    if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SYNC BUTTON
+// ═══════════════════════════════════════════════════════════════
+function updateSyncBtn() {
+  const btn = document.getElementById('syncBtn');
+  const info = document.getElementById('selectedInfo');
+  if (selectedSp && selectedYt) {
+    btn.disabled = false;
+    info.textContent = `"${selectedSp.name}"  →  "${selectedYt.name}"`;
+  } else if (selectedSp) {
+    btn.disabled = true;
+    info.textContent = 'Select a YouTube playlist →';
+  } else {
+    btn.disabled = true;
+    info.textContent = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SYNC ENGINE
+// ═══════════════════════════════════════════════════════════════
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+async function waitIfPaused() {
+  if (isPaused) await new Promise(r => { pauseResolve = r; });
+}
+
+async function fetchSpotifyTracks(playlist) {
+  const tracks = [];
+  let fetchError = null;
+
+  const processItems = (items) => {
+    (items || []).forEach(i => {
+      const t = i.track;
+      if (t && t.name && t.artists && t.artists.length > 0) {
+        tracks.push(`${t.name} ${t.artists[0].name}`);
+      }
+    });
+  };
+
+  if (playlist.id === 'liked') {
+    let url = '/me/tracks?limit=10';
+    while (url) {
+      const data = await spotifyFetch(url);
+      if (isFetchError(data)) { fetchError = data; break; }
+      if (!data?.items) break;
+      processItems(data.items);
+      url = data.next || null;
+    }
+  } else {
+    let url = `/playlists/${playlist.id}/tracks?limit=100`;
+    while (url) {
+      const data = await spotifyFetch(url);
+      if (isFetchError(data)) { fetchError = data; break; }
+      if (!data?.items) break;
+      processItems(data.items);
+      url = data.next || null;
+    }
+  }
+
+  return { tracks, error: fetchError };
+}
+
+async function searchYouTube(query) {
+  try {
+    const r = await fetch('/api/youtube/search?q=' + encodeURIComponent(query));
+    const data = await r.json();
+    return data.videoId || null;
+  } catch { return null; }
+}
+
+async function addToYouTube(playlistId, videoId) {
+  const r = await fetch('/api/youtube/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ playlistId, videoId }),
+  });
+  return r.json();
+}
+
+async function persistProgress() {
+  await fetch(`/api/playlists/${currentSpPlaylistId}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folderName: currentSpPlaylistName,
+      addedSongs: [...addedSongs],
+      failedSongs: [...failedSongs],
+      spPlaylist: selectedSp,
+      ytPlaylist: selectedYt,
+    }),
+  });
+}
+
+async function startSync() {
+  if (!selectedSp || !selectedYt) return;
+  if (!cfg.hasYtCookie) { openModal('ytCookieModal'); return; }
+
+  document.getElementById('syncSetupSection').style.display = 'none';
+  document.getElementById('progressSection').style.display = 'block';
+
+  currentSpPlaylistId = selectedSp.id;
+  currentSpPlaylistName = selectedSp.name;
+  isRunning = true; isPaused = false; shouldStop = false;
+  addedSongs = new Set(); failedSongs = new Set();
+
+  // Save metadata for history
+  const syncMeta = cfg.syncMeta || {};
+  syncMeta[currentSpPlaylistId] = { spPlaylist: selectedSp, ytPlaylist: selectedYt, date: new Date().toISOString() };
+  await saveConfigPatch({ syncMeta });
+
+  // Load previously added songs from file
+  try {
+    const r = await fetch('/api/playlists');
+    const entries = await r.json();
+    const existing = entries.find(e => e.id === currentSpPlaylistId);
+    if (existing) {
+      existing.addedSongs.forEach(s => addedSongs.add(s));
+      logLine('info', `Loaded ${addedSongs.size} previously synced tracks.`);
+    }
+  } catch(e) {}
+
+  document.getElementById('progressTitle').textContent = `Syncing "${selectedSp.name}"`;
+
+  logLine('info', `Fetching Spotify tracks for "${selectedSp.name}"...`);
+  const { tracks: allTracks, error: trackFetchError } = await fetchSpotifyTracks(selectedSp);
+
+  if (trackFetchError) {
+    logLine('error', `Failed to fetch Spotify tracks: ${trackFetchError.message} (HTTP ${trackFetchError.status})`);
+    if (trackFetchError.status === 403) {
+      logLine('error', 'Fix: Add your Spotify account as a test user in the Developer Dashboard (User Management).');
+    } else if (trackFetchError.status === 401) {
+      logLine('error', 'Token expired. Go to Settings and reconnect Spotify.');
+    }
+    toast('Spotify fetch failed', trackFetchError.message + ' (' + trackFetchError.status + ')', 'error', 10000);
+    isRunning = false;
+    backToSetup();
+    return;
+  }
+
+  if (allTracks.length === 0) {
+    logLine('warn', 'No tracks returned from Spotify. The playlist may be empty or there was a silent error.');
+    toast('No tracks found', 'The Spotify playlist appears to be empty.', 'warn', 6000);
+    isRunning = false;
+    backToSetup();
+    return;
+  }
+
+  logLine('success', `Fetched ${allTracks.length} tracks from Spotify.`);
+
+  const toProcess = allTracks.filter(t => !addedSongs.has(t));
+
+  document.getElementById('statTotal').textContent = allTracks.length;
+  document.getElementById('statSkipped').textContent = addedSongs.size;
+  document.getElementById('progressSubtitle').textContent = `${toProcess.length} to add · ${addedSongs.size} already done`;
+
+  logLine('info', `✓ ${addedSongs.size} already synced (in added_songs file) — skipping.`);
+  logLine('info', `→ ${toProcess.length} tracks need to be added to YouTube.`);
+
+  if (toProcess.length === 0) {
+    logLine('success', 'Everything is already synced! Nothing to do.');
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressFill').classList.remove('active');
+    toast('Already up to date', 'All tracks are in the YouTube playlist.', 'success');
+    isRunning = false;
+    return;
+  }
+
+  syncQueue = toProcess;
+
+  for (const track of syncQueue) {
+    await waitIfPaused();
+    if (shouldStop) break;
+    await processTrack(track, selectedYt.id);
+    updateStats(allTracks.length);
+  }
+
+  // Retry failures
+  if (failedSongs.size > 0 && !shouldStop) {
+    logLine('warn', `Retrying ${failedSongs.size} failed tracks...`);
+    const toRetry = [...failedSongs];
+    failedSongs.clear();
+    for (const track of toRetry) {
+      await waitIfPaused();
+      if (shouldStop) break;
+      await processTrack(track, selectedYt.id);
+      updateStats(allTracks.length);
+    }
+  }
+
+  await persistProgress();
+
+  if (!shouldStop) {
+    const a = addedSongs.size, f = failedSongs.size;
+    logLine('success', `✅ Sync complete! ${a} added, ${f} failed.`);
+    document.getElementById('progressFill').classList.remove('active');
+    toast('Sync complete! 🎉', `${a} added${f ? `, ${f} failed` : ''}`, 'complete', 6000);
+    sendNotification('Sync Complete! 🎉', `${selectedSp.name}: ${a} tracks synced to YouTube`);
+    loadHistory();
+  }
+  isRunning = false;
+}
+
+async function processTrack(track, ytPlaylistId) {
+  await delay(600);
+  await waitIfPaused();
+  if (shouldStop) return;
+
+  logLine('info', `Searching: ${track}`);
+  const videoId = await searchYouTube(track);
+  if (!videoId) {
+    logLine('error', `No result: ${track}`);
+    failedSongs.add(track);
+    return;
+  }
+
+  let result;
+  try {
+    result = await addToYouTube(ytPlaylistId, videoId);
+  } catch(e) {
+    logLine('error', `Network error adding "${track}": ${e.message}`);
+    failedSongs.add(track);
+    return;
+  }
+
+  if (!result) {
+    logLine('error', `Empty response adding "${track}" — marking as failed`);
+    failedSongs.add(track);
+    return;
+  }
+
+  if (result.rateLimited) {
+    logLine('warn', '⚠️ Rate limit hit. Pausing 2 minutes...');
+    toast('Rate limit hit', 'Auto-resuming in 2 minutes', 'warn', 10000);
+    sendNotification('Syncify — Rate Limit', 'Sync paused. Auto-resumes in 2 minutes.');
+    await rateLimitCountdown(120);
+    return processTrack(track, ytPlaylistId);
+  }
+
+  if (result.cookieExpired) {
+    logLine('error', '🍪 YouTube cookie expired!');
+    toast('Cookie expired!', 'Update your YouTube cookie to continue', 'cookie', 0);
+    sendNotification('Syncify — Cookie Expired 🍪', 'Update your YouTube cookie to continue.', true);
+    openModal('ytCookieModal');
+    isPaused = true;
+    document.getElementById('pauseResumeBtn').textContent = '▶ Resume';
+    await waitIfPaused();
+    return processTrack(track, ytPlaylistId);
+  }
+
+  if (result.success) {
+    addedSongs.add(track);
+    logLine('success', `✓ Added: ${track}`);
+    if (addedSongs.size % 10 === 0) await persistProgress();
+  } else {
+    failedSongs.add(track);
+    const reason = result.error || result.raw || 'unknown reason';
+    logLine('error', `✗ Failed: ${track} — ${reason}`);
+  }
+}
+
+function updateStats(total) {
+  document.getElementById('statDone').textContent = addedSongs.size;
+  document.getElementById('statFailed').textContent = failedSongs.size;
+  const done = addedSongs.size + failedSongs.size;
+  const pct = total > 0 ? Math.min(100, (done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function rateLimitCountdown(seconds) {
+  return new Promise(resolve => {
+    const bar = document.getElementById('rateLimitBar');
+    bar.classList.add('visible');
+    let rem = seconds;
+    const tick = () => {
+      const m = Math.floor(rem / 60), s = rem % 60;
+      document.getElementById('rateLimitCountdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      if (rem-- <= 0) { bar.classList.remove('visible'); resolve(); return; }
+      setTimeout(tick, 1000);
+    };
+    tick();
+  });
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  const btn = document.getElementById('pauseResumeBtn');
+  if (isPaused) {
+    btn.textContent = '▶ Resume';
+    logLine('warn', 'Paused by user.');
+  } else {
+    btn.textContent = '⏸ Pause';
+    logLine('info', 'Resumed.');
+    if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+  }
+}
+
+function stopSync() {
+  shouldStop = true; isRunning = false;
+  if (pauseResolve) { pauseResolve(); pauseResolve = null; }
+  isPaused = false;
+  persistProgress();
+  logLine('warn', 'Sync stopped. Progress saved.');
+  toast('Stopped', 'Progress has been saved to disk', 'warn');
+  setTimeout(backToSetup, 1500);
+}
+
+function backToSetup() {
+  document.getElementById('syncSetupSection').style.display = 'block';
+  document.getElementById('progressSection').style.display = 'none';
+  document.getElementById('rateLimitBar').classList.remove('visible');
+  document.getElementById('progressFill').classList.add('active');
+  document.getElementById('progressFill').style.width = '0%';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════════
+function logLine(type, msg) {
+  const body = document.getElementById('logBody');
+  const time = new Date().toTimeString().slice(0, 8);
+  const el = document.createElement('div');
+  el.className = `log-line ${type}`;
+  el.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${esc(msg)}</span>`;
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+function clearLog() { document.getElementById('logBody').innerHTML = ''; }
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════
+async function loadHistory() {
+  const grid = document.getElementById('historyGrid');
+  grid.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
+  try {
+    const r = await fetch('/api/playlists');
+    const entries = await r.json();
+    const syncMeta = cfg.syncMeta || {};
+
+    if (!entries.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No playlists found in the /playlists/ folder yet.</p></div>';
+      return;
+    }
+
+    grid.innerHTML = entries.map(e => {
+      // Prefer file-based meta.json, fall back to config.json syncMeta
+      const fileMeta = { spPlaylist: e.spPlaylist, ytPlaylist: e.ytPlaylist, date: e.syncDate };
+      const m = Object.keys(fileMeta).some(k => fileMeta[k]) ? fileMeta : (syncMeta[e.id] || {});
+      const spName = m.spPlaylist?.name || e.folderName;
+      const ytId   = m.ytPlaylist?.id   || '—';
+      const ytName = m.ytPlaylist?.name || ytId;
+      const date   = m.date ? new Date(m.date).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
+      const total  = Math.max(e.total, 1);
+      const pct    = Math.round((e.addedCount / total) * 100);
+      const hasMeta = !!(m.spPlaylist && m.ytPlaylist);
+
+      return `<div class="synced-item">
+        <div class="synced-item-header">
+          <div class="synced-icons"><span class="synced-sp">🎵</span><span class="synced-yt">▶</span></div>
+          <div class="synced-name">${esc(spName)}</div>
+          <span class="badge ${e.failedCount > 0 ? 'badge-yellow' : 'badge-green'}">${pct}%</span>
+        </div>
+        <div class="synced-meta">
+          <span style="color:var(--text3)">SP:</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">${esc(e.id)}</span>
+        </div>
+        <div class="synced-meta">
+          <span style="color:var(--text3)">YT:</span>
+          <span style="color:var(--yt);font-family:'DM Mono',monospace;font-size:10px">${esc(ytId)}</span>
+          ${ytName !== ytId ? `<span style="color:var(--text2)">${esc(ytName)}</span>` : ''}
+          ${!hasMeta ? '<span class="badge badge-gray" style="margin-left:auto">no meta</span>' : ''}
+        </div>
+        <div class="synced-meta">
+          <span>🎵 ${e.addedCount}/${e.total} synced</span>
+          ${e.failedCount > 0 ? `<span style="color:var(--yt2)">✗ ${e.failedCount} failed</span>` : ''}
+          ${date ? `<span style="margin-left:auto">${date}</span>` : ''}
+        </div>
+        <div class="synced-progress"><div class="synced-progress-fill" style="width:${pct}%"></div></div>
+        <div class="synced-actions">
+          <button class="btn btn-ghost btn-sm" onclick="reSyncEntry('${esc(e.id)}')">↺ Re-sync</button>
+          <button class="btn btn-ghost btn-sm" onclick="viewSongs('${esc(e.id)}')">📄 Songs</button>
+          ${!hasMeta ? `<button class="btn btn-ghost btn-sm" onclick="setMeta('${esc(e.id)}','${esc(e.folderName)}')">🔗 Set IDs</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = `<div class="empty-state"><p style="color:var(--yt2)">Error loading history: ${esc(e.message)}</p></div>`;
+  }
+}
+
+async function reSyncEntry(id) {
+  // Prefer file-based meta.json
+  let spPlaylist = null, ytPlaylist = null;
+  try {
+    const r = await fetch('/api/playlists');
+    const entries = await r.json();
+    const e = entries.find(x => x.id === id);
+    if (e?.spPlaylist) spPlaylist = e.spPlaylist;
+    if (e?.ytPlaylist) ytPlaylist = e.ytPlaylist;
+    // Fallback to config.json syncMeta
+    if (!spPlaylist || !ytPlaylist) {
+      const m = (cfg.syncMeta || {})[id] || {};
+      if (!spPlaylist && m.spPlaylist) spPlaylist = m.spPlaylist;
+      if (!ytPlaylist && m.ytPlaylist) ytPlaylist = m.ytPlaylist;
+    }
+  } catch {}
+
+  if (spPlaylist) {
+    // Mark as (local) so user knows it came from saved meta, not live Spotify
+    const localLabel = spPlaylist.name.includes('(local)') ? spPlaylist.name : spPlaylist.name + ' (local)';
+    selectedSp = { ...spPlaylist, name: localLabel };
+    if (!spotifyPlaylists.find(p => p.id === selectedSp.id)) {
+      spotifyPlaylists.unshift(selectedSp);
+    } else {
+      // Update name to include (local)
+      const idx = spotifyPlaylists.findIndex(p => p.id === selectedSp.id);
+      spotifyPlaylists[idx] = selectedSp;
+    }
+  }
+
+  if (ytPlaylist) {
+    selectedYt = ytPlaylist;
+    if (!ytPlaylists.find(p => p.id === selectedYt.id)) ytPlaylists.unshift(selectedYt);
+  }
+
+  showPage('sync');
+  renderSpotifyPlaylists();
+  renderYtPlaylists();
+  document.getElementById('ytPlaylistInput').value = selectedYt?.id || '';
+  updateSyncBtn();
+
+  if (!spPlaylist || !ytPlaylist) {
+    toast('Partial info', 'Some playlist IDs are missing. Click "Set IDs" in History to fix.', 'warn', 6000);
+  } else {
+    toast('Ready to re-sync', `"${spPlaylist.name}" → "${ytPlaylist.name || ytPlaylist.id}"`, 'info');
+  }
+}
+
+async function viewSongs(id) {
+  try {
+    const r = await fetch('/api/playlists');
+    const entries = await r.json();
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    const preview = e.addedSongs.slice(0, 6).join(', ') + (e.addedCount > 6 ? `... +${e.addedCount - 6} more` : '');
+    toast(e.folderName, preview, 'info', 7000);
+  } catch {}
+}
+
+// Open a small inline prompt to set YT playlist ID for playlists missing metadata
+async function setMeta(spId, folderName) {
+  const ytId = prompt(`Enter the YouTube Playlist ID for "${folderName}":\n(e.g. PLxxxxxxxxxx)`);
+  if (!ytId) return;
+  const cleanId = ytId.match(/[?&]list=([^&]+)/) ? ytId.match(/[?&]list=([^&]+)/)[1] : ytId.trim();
+  const ytName = prompt('Enter a display name for this YouTube playlist (or leave blank to use the ID):') || cleanId;
+
+  // Save to file via server
+  await fetch(`/api/playlists/${spId}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folderName,
+      spPlaylist: { id: spId, name: folderName },
+      ytPlaylist: { id: cleanId, name: ytName },
+    }),
+  });
+
+  toast('Saved', `YT playlist linked: ${ytName}`, 'success');
+  loadHistory();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+init();
+</script>
+</body>
+</html>
