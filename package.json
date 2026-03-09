@@ -1,14 +1,18 @@
 {
-  "name": "spotify2yt",
+  "name": "syncify",
   "version": "1.0.0",
-  "type": "module",
+  "description": "[DEPRECATED] Spotify to YouTube playlist sync app (unmaintained)",
+  "main": "server.js",
+  "keywords": [
+    "deprecated",
+    "unmaintained"
+  ],
   "scripts": {
-    "ui": "node ui.js",
-    "cli": "node s2y.js"
+    "sync": "node server.js"
   },
   "dependencies": {
-    "node-fetch": "^3.3.2",
-    "spotify-web-api-node": "^5.0.2",
-    "youtube-search-without-api-key": "^2.0.1"
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
+    "open": "^8.4.2"
   }
 }
